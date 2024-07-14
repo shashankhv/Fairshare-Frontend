@@ -1,15 +1,31 @@
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import Scanner from './src/Scanner';
-// import SimpleImagePicker from './src/SimpleImagePicker';
+import HomeScreen from './src/Components/Home/Homepage';
+import Googlevision from './src/Googlevision';
+import ManualExpense from './src/ManualExpense';
+import GroupsScreen from './src/Components/Groups/Groupscreen';
+import CreateGroupScreen from './src/Components/Groups/CreateGroup';
+const Stack = createStackNavigator();
+
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <Scanner />
-      {/* <SimpleImagePicker />  */}
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Googlevision" component={Googlevision} />
+          <Stack.Screen name="ManualExpense" component={ManualExpense} />
+          <Stack.Screen name="Groups" component={GroupsScreen} />
+          <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
+          {/* Add other screens here */}
+        </Stack.Navigator>
+      </NavigationContainer>
       <StatusBar style="auto" />
-    </View>
+    </SafeAreaProvider>
   );
 }
 
