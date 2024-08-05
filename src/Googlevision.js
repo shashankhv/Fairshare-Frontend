@@ -78,10 +78,8 @@ const App = () => {
   useEffect(() => {
     if (receiptData) {
       try {
-        console.log('Raw receipt data:', receiptData);
-        // const parsedData = JSON.parse(receiptData.data);
-        
-        // setParsedReceiptData(parsedData);
+        console.log('Raw receipt data:', receiptData.data);
+     
       } catch (error) {
         console.error('Error parsing receipt data:', error);
       }
@@ -103,7 +101,7 @@ const App = () => {
         uri: imageUri,
         type: 'image/jpeg',
         name: 'receipt.jpg',
-        // data: fileData,
+        
       });
       
       try {
@@ -113,7 +111,7 @@ const App = () => {
             'Content-Type': 'multipart/form-data',
           },
         });
-        console.log('Response received:', response.data.data.items);
+        console.log('Response received:');
         setReceiptData(response.data);
       } catch (error) {
         console.error('Error uploading image:', error);
@@ -144,28 +142,11 @@ const App = () => {
         <Text style={styles.buttonText}>Select Image</Text>
       </TouchableOpacity>
 
-      {/* {parsedReceiptData && (
-        <ScrollView style={styles.receiptDataContainer} scrollEnabled>
-          <Text style={styles.receiptDataTitle}>Receipt Data:</Text>
-          {parsedReceiptData.items.map((item, index) => (
-            <View key={index} style={styles.itemContainer}>
-              <Text>{item.name} - ${item.price.toFixed(2)} (x{item.quantity})</Text>
-            </View>
-          ))}
-          <Text style={styles.summaryText}>Subtotal: ${parsedReceiptData.subtotal.toFixed(2)}</Text>
-          <Text style={styles.summaryText}>Tax: ${parsedReceiptData.tax.toFixed(2)}</Text>
-          <Text style={styles.summaryText}>Total: ${parsedReceiptData.total.toFixed(2)}</Text>
-        </ScrollView>
-      )}
 
-      {receiptData && (
-        <ScrollView style={styles.receiptDataContainer} scrollEnabled>
-          <Text>Receipt Data (raw): {JSON.stringify(receiptData, null, 2)}</Text>
-        </ScrollView>
-      )} */}
+     
+
     </View>
-  );
-};
+    );};
 
 const styles = StyleSheet.create({
   container: {

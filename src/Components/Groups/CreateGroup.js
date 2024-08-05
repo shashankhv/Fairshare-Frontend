@@ -1,43 +1,53 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { addGroup } from '../Redux/reducers/groupReducer'; // Ensure the correct path
+import uuid from 'react-native-uuid';
 
 const CreateGroupScreen = ({ navigation }) => {
   const [groupName, setGroupName] = useState('');
+  const dispatch = useDispatch();
 
-  const handleCreate = () => {
-    // Handle group creation logic here
-    // After creation, navigate back to Groups screen
-    navigation.goBack();
+  const handleCreateGroup = () => {
+    if (groupName.trim()) {
+      const newGroup = {
+        id: uuid.v4(),
+        name: groupName,
+        members: [],
+        expenses: [],
+        invitationCode: Math.random().toString(36).substring(2, 15),
+      };
+      dispatch(addGroup(newGroup));
+      setGroupName('');
+      navigation.navigate('GroupDetails', { groupId: newGroup.id });
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Group Name</Text>
+      <Text>Create Group</Text>
       <TextInput
         style={styles.input}
         value={groupName}
         onChangeText={setGroupName}
+        placeholder="Group Name"
       />
-      <Button title="Create Group" onPress={handleCreate} />
+      <Button title="Create Group" onPress={handleCreateGroup} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    padding: 16,
     flex: 1,
-    padding: 20,
-  },
-  label: {
-    fontSize: 18,
-    marginBottom: 10,
   },
   input: {
-    height: 40,
-    borderColor: '#ccc',
     borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
+    borderColor: '#ccc',
+    padding: 8,
+    marginBottom: 8,
+    borderRadius: 4,
   },
 });
 

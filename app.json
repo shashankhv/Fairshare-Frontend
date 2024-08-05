@@ -8,16 +8,25 @@
         {
           "photosPermission": "custom photos permission",
           "cameraPermission": "Allow $(PRODUCT_NAME) to open the camera",
-
           "//": "Disables the microphone permission",
           "microphonePermission": false
         }
-      ]],
+      ]
+    ],
     "version": "1.0.0",
     "orientation": "portrait",
-    
     "icon": "./assets/icon.png",
-    "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE","ACCESS_NETWORK_STATE","ACCESS_WIFI_STATE","CHANGE_WIFI_STATE","INTERNET","WAKE_LOCK","INTERNET"],
+    "permissions": [
+      "CAMERA",
+      "READ_EXTERNAL_STORAGE",
+      "WRITE_EXTERNAL_STORAGE",
+      "ACCESS_NETWORK_STATE",
+      "ACCESS_WIFI_STATE",
+      "CHANGE_WIFI_STATE",
+      "INTERNET",
+      "WAKE_LOCK",
+      "INTERNET"
+    ],
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -34,10 +43,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "hvshashank.fairshare"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8405fcd7-0a58-451e-b5b1-8a4dd3edb5bf"
+      }
     }
   }
 }

@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+// src/Components/Groups/Groupscreen.js
+import React from 'react';
 import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 
 const GroupsScreen = () => {
-  const [groups, setGroups] = useState([]);
+  const groups = useSelector(state => state.groups.groups); // Use selector to get groups
   const navigation = useNavigation();
 
   const handleCreateGroup = () => {
@@ -13,14 +15,16 @@ const GroupsScreen = () => {
 
   const handleGroupPress = (group) => {
     // Navigation to GroupDetails screen
-    navigation.navigate('GroupDetails', { group });
+    console.log('Group pressed:', group);
+    navigation.navigate('GroupDetails', { groupId: group.id });
   };
 
   return (
     <View style={styles.container}>
+      
       <FlatList
         data={groups}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => handleGroupPress(item)}>
             <View style={styles.groupItem}>
