@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { addExpense } from '../Redux/reducers/groupReducer'; // Ensure the correct path
 import uuid from 'react-native-uuid';
+import { colors, sizes } from '../../theme'; // Import theme
 
 const AddExpenseScreen = ({ route, navigation }) => {
   const { groupId } = route.params; // Get the groupId from the navigation params
@@ -53,86 +54,153 @@ const AddExpenseScreen = ({ route, navigation }) => {
   if (group.members.length === 0) {
     return (
       <View style={styles.container}>
-        <Text>No members to add an expense.</Text>
+        <Text style={styles.noMembersText}>No members to add an expense.</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text>Add Expense</Text>
-      <TextInput
-        style={styles.input}
-        value={description}
-        onChangeText={setDescription}
-        placeholder="Description"
-      />
-      <TextInput
-        style={styles.input}
-        value={date}
-        onChangeText={setDate}
-        placeholder="Date"
-      />
-      <TextInput
-        style={styles.input}
-        value={total}
-        onChangeText={setTotal}
-        placeholder="Total Amount"
-        keyboardType="numeric"
-      />
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Add Expense</Text>
+        <TextInput
+          style={styles.input}
+          value={description}
+          onChangeText={setDescription}
+          placeholder="Description"
+          placeholderTextColor={colors.placeholder}
+        />
+        <TextInput
+          style={styles.input}
+          value={date}
+          onChangeText={setDate}
+          placeholder="Date"
+          placeholderTextColor={colors.placeholder}
+        />
+        <TextInput
+          style={styles.input}
+          value={total}
+          onChangeText={setTotal}
+          placeholder="Total Amount"
+          placeholderTextColor={colors.placeholder}
+          keyboardType="numeric"
+        />
 
-      <Picker
-        selectedValue={splitMethod}
-        onValueChange={(itemValue) => setSplitMethod(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Split Equally" value="equal" />
-        <Picker.Item label="Split Unequally" value="unequal" />
-      </Picker>
-
-      {splitMethod === 'unequal' && group.members.map((member) => (
-        <View key={member.id} style={styles.memberInputContainer}>
-          <Text>{member.name}</Text>
-          <TextInput
-            style={styles.input}
-            value={allocations[member.id] ? allocations[member.id].toString() : ''}
-            onChangeText={(value) => handleAllocationChange(member.id, value)}
-            placeholder="Allocation"
-            keyboardType="numeric"
-          />
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={splitMethod}
+            onValueChange={(itemValue) => setSplitMethod(itemValue)}
+            style={styles.picker}
+            itemStyle={styles.pickerItem}
+          >
+            <Picker.Item label="Split Equally" value="equal" />
+            <Picker.Item label="Split Unequally" value="unequal" />
+          </Picker>
         </View>
-      ))}
 
-      <Button title="Add Expense" onPress={handleAddExpense} />
-    </View>
+        {splitMethod === 'unequal' && group.members.map((member) => (
+          <View key={member.id} style={styles.memberInputContainer}>
+            <Text style={styles.memberName}>{member.name}</Text>
+            <TextInput
+              style={styles.memberInput}
+              value={allocations[member.id] ? allocations[member.id].toString() : ''}
+              onChangeText={(value) => handleAllocationChange(member.id, value)}
+              placeholder="Allocation"
+              placeholderTextColor={colors.placeholder}
+              keyboardType="numeric"
+            />
+          </View>
+        ))}
+
+        <TouchableOpacity style={styles.addButton} onPress={handleAddExpense}>
+          <Text style={styles.addButtonText}>Add Expense</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    flex: 1,
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 4,
+  },
+  container: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: colors.background,
+  },
+  title: {
+    fontSize: sizes.font.large,
+    fontWeight: 'bold',
+    color: colors.primary,
+    marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
-    marginBottom: 8,
-    borderRadius: 4,
+    borderColor: colors.border,
+    padding: 12,
+    marginBottom: 16,
+    borderRadius: sizes.button.borderRadius,
+    backgroundColor: colors.inputBackground,
+    color: colors.text,
+    width: '100%',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: sizes.button.borderRadius,
+    marginBottom: 16,
+    backgroundColor: colors.inputBackground,
     width: '100%',
   },
   picker: {
-    height: 50,
+    height: Platform.OS === 'ios' ? 50 : 50, // Adjust height for iOS
     width: '100%',
-    marginBottom: 16,
+  },
+  pickerItem: {
+    height: 44,
   },
   memberInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 16,
+    width: '100%',
+  },
+  memberName: {
+    fontSize: sizes.font.medium,
+    color: colors.text,
+    width: '40%',
+  },
+  memberInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 8,
+    borderRadius: sizes.button.borderRadius,
+    backgroundColor: colors.inputBackground,
+    color: colors.text,
+    width: '55%',
+  },
+  noMembersText: {
+    fontSize: sizes.font.medium,
+    color: colors.text,
+    textAlign: 'center',
+  },
+  addButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    borderRadius: sizes.button.borderRadius,
+    alignItems: 'center',
+    marginTop: 20,
+    width: '100%',
+  },
+  addButtonText: {
+    color: colors.buttonText,
+    fontSize: sizes.font.medium,
   },
 });
 

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 import { useDispatch, useSelector } from 'react-redux';
-import { addExpense } from './Components/Redux/reducers/groupReducer'; // Ensure the correct path
+import { addExpense } from '../Redux/reducers/groupReducer'; // Ensure the correct path
 import uuid from 'react-native-uuid';
-import { colors, sizes } from './theme'; // Import theme
+import { colors, sizes } from '../../theme'; // Import theme
 
 const Googlevision = ({ route, navigation }) => {
   const { groupId } = route.params; // Get the groupId from the navigation params
@@ -15,8 +15,8 @@ const Googlevision = ({ route, navigation }) => {
   const [receiptData, setReceiptData] = useState(null);
   const [imageUri, setImageUri] = useState(null);
   const [parsedReceiptData, setParsedReceiptData] = useState(null);
-  const [loading, setLoading] = useState(false);
-
+  const [allocations, setAllocations] = useState({});
+  
   const dispatch = useDispatch();
 
   const takePicture = async () => {
@@ -39,8 +39,8 @@ const Googlevision = ({ route, navigation }) => {
         return;
       }
 
-      setReceiptImage({ uri: pickerResult.assets[0].uri });
-      setImageUri(pickerResult.assets[0].uri);
+      setReceiptImage({ uri: pickerResult.uri });
+      setImageUri(pickerResult.uri);
       console.log('imageUri after setState:', imageUri);
 
     } catch (error) {
@@ -67,8 +67,8 @@ const Googlevision = ({ route, navigation }) => {
         return;
       }
       console.log('Picker Result:', pickerResult);  
-      setReceiptImage({ uri: pickerResult.assets[0].uri });
-      setImageUri(pickerResult.assets[0].uri);
+      setReceiptImage({ uri: pickerResult.uri });
+      setImageUri(pickerResult.uri);
     } catch (error) {
       console.error('Error selecting image:', error);
     }
@@ -88,18 +88,15 @@ const Googlevision = ({ route, navigation }) => {
     if (receiptData) {
       try {
         console.log('Raw receipt data:', receiptData.data);
-        setParsedReceiptData(receiptData.data);
+     
       } catch (error) {
         console.error('Error parsing receipt data:', error);
-      } finally {
-        setLoading(false);
       }
     }
   }, [receiptData]);
 
   const sendToGoogle = async (imageUri) => {
     try {
-      setLoading(true);
       const fileInfo = await FileSystem.getInfoAsync(imageUri);
       console.log('File Info:', fileInfo);
 
@@ -113,8 +110,9 @@ const Googlevision = ({ route, navigation }) => {
         uri: imageUri,
         type: 'image/jpeg',
         name: 'receipt.jpg',
+        
       });
-
+      
       try {
         console.log('Uploading image...');
         const response = await axios.post('http://134.88.142.187:3000/scan-receipt', formData, {
@@ -136,16 +134,12 @@ const Googlevision = ({ route, navigation }) => {
         console.error('Error Request:', error.request);
       } else {
         console.error('Error Message:', error.message);
-      } }
-      
-      finally {
-        setLoading(false);
       }
-    
+    }
   };
 
   const handleAddExpense = () => {
-    const totalAmount = receiptData ? receiptData.total : 0; // Example: Total amount from parsed receipt data
+    const totalAmount = receiptData.total; // Example: Total amount from parsed receipt data
     let membersAllocation = {};
 
     group.members.forEach(member => {
@@ -162,7 +156,7 @@ const Googlevision = ({ route, navigation }) => {
 
     const newExpense = {
       id: uuid.v4(),
-      description: receiptData && receiptData.store_name ? receiptData.store_name : 'Receipt Expense',
+      description: receiptData.store_name || 'Receipt Expense',
       date: new Date().toISOString().split('T')[0],
       total: totalAmount,
       allocations: membersAllocation,
@@ -171,25 +165,21 @@ const Googlevision = ({ route, navigation }) => {
     dispatch(addExpense({ groupId, expense: newExpense }));
     navigation.goBack(); // Navigate back to the previous screen
   };
-
+console.log('parsedReceiptData:', parsedReceiptData);
   return (
     <View style={styles.container}>
-      {loading && (
-        <ActivityIndicator size="large" color="#0000ff" />
+      {receiptImage && (
+        <Image source={receiptImage} style={styles.receiptImage} />
       )}
 
-      {!loading && (
-        <>
-          <TouchableOpacity style={styles.button} onPress={takePicture}>
-            <Text style={styles.buttonText}>Take Picture</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={selectImage}>
-            <Text style={styles.buttonText}>Select Image</Text>
-          </TouchableOpacity>
-        </>
-      )}
+      <TouchableOpacity style={styles.button} onPress={takePicture}>
+        <Text style={styles.buttonText}>Take Picture</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={selectImage}>
+        <Text style={styles.buttonText}>Select Image</Text>
+      </TouchableOpacity>
 
-      {receiptData && !loading && (
+      {/* {receiptData && (
         <View style={styles.receiptDataContainer}>
           <Text style={styles.receiptDataTitle}>Parsed Receipt Data</Text>
           <ScrollView>
@@ -200,12 +190,12 @@ const Googlevision = ({ route, navigation }) => {
               </View>
             ))}
           </ScrollView>
-          <Text style={styles.summaryText}>Total: ${receiptData.total ? receiptData.total.toFixed(2) : 'N/A'}</Text>
+          <Text style={styles.summaryText}>Total: ${receiptData.total.toFixed(2)}</Text>
           <TouchableOpacity style={styles.addButton} onPress={handleAddExpense}>
             <Text style={styles.addButtonText}>Add Expense</Text>
           </TouchableOpacity>
         </View>
-      )}
+      )} */}
     </View>
   );
 };

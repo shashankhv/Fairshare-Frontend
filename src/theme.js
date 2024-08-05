@@ -1,23 +1,28 @@
 // src/theme.js
-const colors = {
-    primary: '#007bff',
-    secondary: '#6c757d',
-    background: '#f8f9fa',
-    text: '#343a40',
-    accent: '#28a745',
+export const colors = {
+    primary: '#6200EA', // Example primary color (Purple)
+    secondary: '#03DAC6', // Example secondary color (Teal)
+    background: '#FFFFFF', // White background for a clean look
+    text: '#000000', // Black text for high contrast
+    placeholder: '#AAAAAA', // Light gray for placeholder text
+    cardBackground: '#F3F3F3', // Light gray for card background
+    inputBackground: '#EFEFEF', // Slightly darker gray for inputs
+    border: '#CCCCCC', // Gray for borders
+    buttonText: '#FFFFFF', // White text for buttons
   };
   
-  const sizes = {
+  export const sizes = {
     font: {
-      small: 14,
-      medium: 18,
-      large: 22,
+      small: 12,
+      medium: 16,
+      large: 20,
+      xlarge: 24,
     },
     button: {
       height: 50,
-      borderRadius: 10,
+      borderRadius: 8,
+    },
+    card: {
+      borderRadius: 8,
     },
   };
-  
-  export { colors, sizes };
-  
