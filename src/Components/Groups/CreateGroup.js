@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { addGroup } from '../Redux/reducers/groupReducer'; // Ensure the correct path
 import uuid from 'react-native-uuid';
@@ -37,7 +37,7 @@ const CreateGroupScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.createButton} onPress={handleCreateGroup}>
         <Text style={styles.createButtonText}>Create Group</Text>
       </TouchableOpacity>
-    </View>
+    </View> 
   );
 };
 
@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: colors.background,
+    paddingTop: Platform.OS === 'android' ? 25 : 0,
   },
   title: {
     fontSize: sizes.font.large,

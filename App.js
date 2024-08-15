@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -13,13 +13,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, sizes } from './src/theme'; // Import theme
 
 import HomeScreen from './src/Components/Home/Homepage';
-import Googlevision from './src/Googlevision';
+import ReceiptDataFetcher from './src/Googlevision';
 import ManualExpense from './src/ManualExpense';
 import GroupsScreen from './src/Components/Groups/Groupscreen';
 import CreateGroupScreen from './src/Components/Groups/CreateGroup';
 import GroupDetails from './src/Components/Groups/GroupDetails';
 import AddExpense from './src/Components/Groups/AddExpense';
 import SettingsScreen from './src/Components/Settings/SettingsHome'; // Assume you have a SettingsScreen
+import AllocateReceipt from './src/Allocation';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -42,8 +43,8 @@ function HomeStack() {
         component={HomeScreen} 
         options={{ headerShown: false }} 
       />
-      <Stack.Screen name="Googlevision" component={Googlevision} />
-      <Stack.Screen name="ManualExpense" component={ManualExpense} />
+      <Stack.Screen name="Googlevision" component={ReceiptDataFetcher} />
+      <Stack.Screen name="AllocateReceipt" component={AllocateReceipt} />
       <Stack.Screen name="GroupDetails" component={GroupDetails} />
       <Stack.Screen name="AddExpense" component={AddExpense} />
     </Stack.Navigator>
@@ -61,6 +62,18 @@ function GroupsStack() {
       <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
       <Stack.Screen name="GroupDetails" component={GroupDetails} />
       <Stack.Screen name="AddExpense" component={AddExpense} />
+    </Stack.Navigator>
+  );
+}
+
+function SettingsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="SettingsMain" 
+        component={SettingsScreen} 
+        options={{ headerShown: false }} 
+      />
     </Stack.Navigator>
   );
 }
@@ -90,11 +103,12 @@ function MainTabNavigator() {
           backgroundColor: colors.background,
           borderTopWidth: 0,
         },
+        headerShown: false,
       })}
     >
       <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Groups" component={GroupsStack} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name="Settings" component={SettingsStack} />
     </Tab.Navigator>
   );
 }

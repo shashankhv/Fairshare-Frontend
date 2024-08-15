@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: colors.background,
+    paddingTop: 50,
   },
   title: {
     fontSize: sizes.font.large,

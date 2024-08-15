@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, Share, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Share, TextInput } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
@@ -77,7 +77,9 @@ const GroupDetails = ({ route }) => {
         ListEmptyComponent={<Text>No expenses recorded.</Text>}
       />
 
-      <Button title="Add Expense" onPress={() => setIsAddExpenseModalVisible(true)} />
+      <TouchableOpacity style={styles.expenseButton} onPress={() => setIsAddExpenseModalVisible(true)}>
+        <Text style={styles.expenseButtonText}>Add Expense</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity style={styles.addButton} onPress={() => setIsModalVisible(true)}>
         <Ionicons name="person-add" size={24} color="white" />
@@ -103,14 +105,19 @@ const GroupDetails = ({ route }) => {
           <Text style={styles.modalTitle}>Add Member</Text>
           {/* <QRCode value={invitationLink} size={100} /> */}
           <Text>Invitation Code: {group.invitationCode}</Text>
-          <Button title="Share Invitation Link" onPress={handleShare} />
+          <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+            <Text style={styles.shareButtonText}>Share Invitation Link</Text>
+          </TouchableOpacity>
           <TextInput
             style={styles.input}
             value={newMemberName}
             onChangeText={setNewMemberName}
             placeholder="Member Name"
+            placeholderTextColor={colors.placeholder}
           />
-          <Button title="Add Member" onPress={handleAddMember} />
+          <TouchableOpacity style={styles.modalButton} onPress={handleAddMember}>
+            <Text style={styles.modalButtonText}>Add Member</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
     </View>
@@ -134,10 +141,25 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    marginVertical: 5,
+    width: '100%',
+  },
+  expenseButton: {
+    marginTop: 20,
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: sizes.button.borderRadius,
+    alignItems: 'center',
+    width: '100%',
+  },
+  expenseButtonText: {
+    color: colors.buttonText,
+    fontSize: sizes.font.medium,
   },
   addButton: {
     position: 'absolute',
-    bottom: 16,
+    bottom: 90,
     right: 16,
     backgroundColor: colors.primary,
     borderRadius: 50,
@@ -181,6 +203,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderRadius: sizes.button.borderRadius,
     width: '100%',
+  },
+  shareButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: sizes.button.borderRadius,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  shareButtonText: {
+    color: colors.buttonText,
+    fontSize: sizes.font.medium,
   },
 });
 

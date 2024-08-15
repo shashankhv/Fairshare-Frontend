@@ -1,23 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
-import { useDispatch, useSelector } from 'react-redux';
-import { addExpense } from './Components/Redux/reducers/groupReducer'; // Ensure the correct path
-import uuid from 'react-native-uuid';
-import { colors, sizes } from './theme'; // Import theme
+import { colors } from './theme';
 
-const Googlevision = ({ route, navigation }) => {
-  const { groupId } = route.params; // Get the groupId from the navigation params
-  const group = useSelector(state => state.groups.groups.find(g => g.id === groupId)); // Find the group by id
+const ReceiptDataFetcher = ({ navigation, route }) => {
+  const { groupId } = route.params;
   const [receiptImage, setReceiptImage] = useState(null);
   const [receiptData, setReceiptData] = useState(null);
   const [imageUri, setImageUri] = useState(null);
-  const [parsedReceiptData, setParsedReceiptData] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  const dispatch = useDispatch();
 
   const takePicture = async () => {
     try {
@@ -84,19 +77,6 @@ const Googlevision = ({ route, navigation }) => {
     uploadImage();
   }, [imageUri]);
 
-  useEffect(() => {
-    if (receiptData) {
-      try {
-        console.log('Raw receipt data:', receiptData.data);
-        setParsedReceiptData(receiptData.data);
-      } catch (error) {
-        console.error('Error parsing receipt data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-  }, [receiptData]);
-
   const sendToGoogle = async (imageUri) => {
     try {
       setLoading(true);
@@ -122,8 +102,14 @@ const Googlevision = ({ route, navigation }) => {
             'Content-Type': 'multipart/form-data',
           },
         });
-        console.log('Response received:');
-        setReceiptData(response.data);
+        console.log('Response received:', response.data);
+
+        if (response.data && response.data.success && response.data.data) {
+          setReceiptData(response.data.data);
+          navigation.navigate('AllocateReceipt', { receiptData: response.data.data, groupId });
+        } else {
+          console.error('Invalid receipt data received:', response.data);
+        }
       } catch (error) {
         console.error('Error uploading image:', error);
       }
@@ -136,47 +122,15 @@ const Googlevision = ({ route, navigation }) => {
         console.error('Error Request:', error.request);
       } else {
         console.error('Error Message:', error.message);
-      } }
-      
-      finally {
-        setLoading(false);
       }
-    
-  };
-
-  const handleAddExpense = () => {
-    const totalAmount = receiptData ? receiptData.total : 0; // Example: Total amount from parsed receipt data
-    let membersAllocation = {};
-
-    group.members.forEach(member => {
-      membersAllocation[member.id] = 0; // Initialize allocation for each member
-    });
-
-    parsedReceiptData.items.forEach(item => {
-      // Allocate each item equally among all members (you can adjust this logic)
-      const equalShare = item.price / group.members.length;
-      group.members.forEach(member => {
-        membersAllocation[member.id] += equalShare;
-      });
-    });
-
-    const newExpense = {
-      id: uuid.v4(),
-      description: receiptData && receiptData.store_name ? receiptData.store_name : 'Receipt Expense',
-      date: new Date().toISOString().split('T')[0],
-      total: totalAmount,
-      allocations: membersAllocation,
-    };
-
-    dispatch(addExpense({ groupId, expense: newExpense }));
-    navigation.goBack(); // Navigate back to the previous screen
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
-      {loading && (
-        <ActivityIndicator size="large" color="#0000ff" />
-      )}
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
 
       {!loading && (
         <>
@@ -189,23 +143,7 @@ const Googlevision = ({ route, navigation }) => {
         </>
       )}
 
-      {receiptData && !loading && (
-        <View style={styles.receiptDataContainer}>
-          <Text style={styles.receiptDataTitle}>Parsed Receipt Data</Text>
-          <ScrollView>
-            {parsedReceiptData.items.map((item, index) => (
-              <View key={index} style={styles.itemContainer}>
-                <Text>{item.name}</Text>
-                <Text>Price: ${item.price.toFixed(2)}</Text>
-              </View>
-            ))}
-          </ScrollView>
-          <Text style={styles.summaryText}>Total: ${receiptData.total ? receiptData.total.toFixed(2) : 'N/A'}</Text>
-          <TouchableOpacity style={styles.addButton} onPress={handleAddExpense}>
-            <Text style={styles.addButtonText}>Add Expense</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {receiptImage && <Image source={receiptImage} style={styles.receiptImage} />}
     </View>
   );
 };
@@ -215,7 +153,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: colors.background,
   },
   receiptImage: {
     width: 300,
@@ -232,40 +170,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
   },
-  receiptDataContainer: {
-    padding: 20,
-    backgroundColor: '#f2f2f2',
-    marginTop: 20,
-    width: '90%',
-  },
-  receiptDataTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  itemContainer: {
-    marginBottom: 10,
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 5,
-    borderColor: '#ddd',
-    borderWidth: 1,
-  },
-  summaryText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 10,
-  },
-  addButton: {
-    backgroundColor: '#2ecc71',
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 20,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 20,
-  },
 });
 
-export default Googlevision;
+export default ReceiptDataFetcher;

@@ -1,16 +1,40 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, Modal, TouchableOpacity } from 'react-native';
-import { Button, Card, Title, Paragraph } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, Modal, Platform } from 'react-native';
+import { Card } from 'react-native-elements';
 import { useSelector } from 'react-redux';
 import { colors, sizes } from '../../theme';
+import { Ionicons } from '@expo/vector-icons'; 
 
 const HomeScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [groupSelectVisible, setGroupSelectVisible] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
   const groups = useSelector(state => state.groups.groups);
+  const userId = 'currentUserId'; // Replace with the actual current user's ID
+  const [totalOwe, setTotalOwe] = useState(0);
+  const [totalOwed, setTotalOwed] = useState(0);
 
-  const userName = 'User';
-  const totalOwe = 50.00;
-  const totalOwed = 30.00;
+  useEffect(() => {
+    let owe = 20;
+    let owed =40;
+    
+    groups.forEach(group => {
+      group.expenses.forEach(expense => {
+        if (expense.payer === userId) {
+          expense.allocations.forEach((amount, memberId) => {
+            if (memberId !== userId) {
+              owed += amount;
+            }
+          });
+        } else if (expense.allocations[userId]) {
+          owe += expense.allocations[userId];
+        }
+      });
+    });
+
+    setTotalOwe(owe);
+    setTotalOwed(owed);
+  }, [groups]);
 
   const openModal = () => setModalVisible(true);
   const closeModal = () => setModalVisible(false);
@@ -22,27 +46,37 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleGroupSelect = (groupId) => {
-    closeModal();
-    navigation.navigate('AddExpense', { groupId });
+    console.log('Selected group:', groupId);
+    setSelectedGroupId(groupId);
+    setGroupSelectVisible(true);
+  };
+
+  const handleAddExpense = (method) => {
+    setGroupSelectVisible(false);
+    if (method === 'manual') {
+      navigation.navigate('ManualExpense', { groupId: selectedGroupId });
+    } else if (method === 'scan') {
+      navigation.navigate('Googlevision', { groupId: selectedGroupId });
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       {groups.length > 0 ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.greeting}>Welcome, {userName}!</Text>
+          <Text style={styles.greeting}>Welcome, User!</Text>
 
-          <Card style={styles.balanceCard}>
-            <Card.Content>
-              <Title style={styles.title}>Overall Balance</Title>
-              <Paragraph style={styles.paragraph}>Owe: ${totalOwe.toFixed(2)}</Paragraph>
-              <Paragraph style={styles.paragraph}>Owed: ${totalOwed.toFixed(2)}</Paragraph>
-            </Card.Content>
+          <Card containerStyle={styles.balanceCard}>
+            <Card.Title style={styles.title}>Overall Balance</Card.Title>
+            <Card.Divider />
+            <Text style={styles.paragraph}>Owe: ${totalOwe.toFixed(2)}</Text>
+            <Text style={styles.paragraph}>Owed: ${totalOwed.toFixed(2)}</Text>
           </Card>
 
-          <Button mode="contained" style={styles.button} onPress={openModal}>
-            Add Expense
-          </Button>
+          <TouchableOpacity style={styles.addButton} onPress={openModal}>
+            <Ionicons name="add-circle-outline" size={24} color={colors.buttonText} />
+            <Text style={styles.addButtonText}>Add Expense</Text>
+          </TouchableOpacity>
 
           <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={closeModal}>
             <View style={styles.modalContainer}>
@@ -67,13 +101,36 @@ const HomeScreen = ({ navigation }) => {
               </View>
             </View>
           </Modal>
+
+          <Modal animationType="slide" transparent={true} visible={groupSelectVisible} onRequestClose={() => setGroupSelectVisible(false)}>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Choose Method</Text>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => handleAddExpense('manual')}
+                >
+                  <Text style={styles.modalButtonText}>Add Manually</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => handleAddExpense('scan')}
+                >
+                  <Text style={styles.modalButtonText}>Scan Receipt</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setGroupSelectVisible(false)}>
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </ScrollView>
       ) : (
         <View style={styles.noGroupsContainer}>
           <Text style={styles.noGroupsText}>No groups available. Please create a group.</Text>
-          <Button mode="contained" style={styles.button} onPress={handleCreateGroup}>
-            Create Group
-          </Button>
+          <TouchableOpacity style={styles.createGroupButton} onPress={handleCreateGroup}>
+            <Text style={styles.createGroupButtonText}>Create Group</Text>
+          </TouchableOpacity>
         </View>
       )}
     </SafeAreaView>
@@ -84,6 +141,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    paddingTop: Platform.OS === 'android' ? 25 : 0, // Add padding for Android status bar
   },
   scrollContainer: {
     flexGrow: 1,
@@ -111,13 +169,20 @@ const styles = StyleSheet.create({
     fontSize: sizes.font.medium,
     color: colors.text,
   },
-  button: {
-    marginVertical: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    fontSize: sizes.font.medium,
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.primary,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
     borderRadius: sizes.button.borderRadius,
+    marginTop: 20,
+  },
+  addButtonText: {
+    color: colors.buttonText,
+    fontSize: sizes.font.medium,
+    marginLeft: 10,
   },
   modalContainer: {
     flex: 1,
@@ -126,7 +191,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: 300,
+    width: '80%',
     backgroundColor: 'white',
     borderRadius: sizes.card.borderRadius,
     padding: 20,
@@ -148,11 +213,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: colors.text,
+    backgroundColor: '#e74c3c',
   },
   modalButtonText: {
-    color: colors.buttonText,
-    fontSize: sizes.font.medium,
+    color: 'white',
+    fontSize: 18,
   },
   noGroupsContainer: {
     flex: 1,
@@ -165,6 +230,16 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: 20,
     textAlign: 'center',
+  },
+  createGroupButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: sizes.button.borderRadius,
+  },
+  createGroupButtonText: {
+    color: colors.buttonText,
+    fontSize: sizes.font.medium,
   },
 });
 
