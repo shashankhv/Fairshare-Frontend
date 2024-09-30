@@ -14,6 +14,7 @@ const AddExpenseScreen = ({ route, navigation }) => {
   const [total, setTotal] = useState('');
   const [splitMethod, setSplitMethod] = useState('equal');
   const [allocations, setAllocations] = useState({});
+  const [payer, setPayer] = useState(group.members[0].id); // Default to the first member
 
   const dispatch = useDispatch();
 
@@ -37,6 +38,7 @@ const AddExpenseScreen = ({ route, navigation }) => {
         date,
         total: totalAmount,
         allocations: membersAllocation,
+        payer, // Add payer to the expense object
       };
 
       dispatch(addExpense({ groupId, expense: newExpense }));
@@ -85,6 +87,20 @@ const AddExpenseScreen = ({ route, navigation }) => {
           placeholderTextColor={colors.placeholder}
           keyboardType="numeric"
         />
+
+        <View style={styles.pickerContainer}>
+          <Text style={styles.pickerLabel}>Who Paid?</Text>
+          <Picker
+            selectedValue={payer}
+            onValueChange={(itemValue) => setPayer(itemValue)}
+            style={styles.picker}
+            itemStyle={styles.pickerItem}
+          >
+            {group.members.map((member) => (
+              <Picker.Item key={member.id} label={member.name} value={member.id} />
+            ))}
+          </Picker>
+        </View>
 
         <View style={styles.pickerContainer}>
           <Picker
@@ -156,6 +172,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     backgroundColor: colors.inputBackground,
     width: '100%',
+  },
+  pickerLabel: {
+    fontSize: sizes.font.medium,
+    color: colors.text,
+    marginBottom: 8,
   },
   picker: {
     height: Platform.OS === 'ios' ? 50 : 50, // Adjust height for iOS

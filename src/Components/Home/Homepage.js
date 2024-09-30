@@ -10,34 +10,48 @@ const HomeScreen = ({ navigation }) => {
   const [groupSelectVisible, setGroupSelectVisible] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const groups = useSelector(state => state.groups.groups);
-  const userId = 'currentUserId'; // Replace with the actual current user's ID
-  const [totalOwe, setTotalOwe] = useState(0);
-  const [totalOwed, setTotalOwed] = useState(0);
+
+  const [memberBalances, setMemberBalances] = useState([]);
 
   useEffect(() => {
-    let owe = 20;
-    let owed =40;
+    let balances = {};
     
     groups.forEach(group => {
       group.expenses.forEach(expense => {
-        if (expense.payer === userId) {
-          expense.allocations.forEach((amount, memberId) => {
-            if (memberId !== userId) {
-              owed += amount;
-            }
-          });
-        } else if (expense.allocations[userId]) {
-          owe += expense.allocations[userId];
+        const payerId = expense.payer;
+        if (!balances[payerId]) {
+          balances[payerId] = { owe: 0, owed: 0 };
         }
+        Object.entries(expense.allocations).forEach(([memberId, amount]) => {
+          if (memberId === payerId) return;
+
+          if (!balances[memberId]) {
+            balances[memberId] = { owe: 0, owed: 0 };
+          }
+
+          balances[memberId].owe += amount;
+          balances[payerId].owed += amount;
+        });
       });
     });
 
-    setTotalOwe(owe);
-    setTotalOwed(owed);
+
+
+    const formattedBalances = Object.entries(balances).map(([memberId, balance]) => ({
+      memberId,
+      ...balance,
+    }));
+
+    setMemberBalances(formattedBalances);
   }, [groups]);
 
   const openModal = () => setModalVisible(true);
   const closeModal = () => setModalVisible(false);
+
+  function getMemberNameById(memberId, group) {
+    const member = group.members.find(m => m.id === memberId);
+    return member ? member.name : 'Unknown Member';
+  }
 
   const handleCreateGroup = () => {
     navigation.navigate('Groups', {
@@ -49,12 +63,13 @@ const HomeScreen = ({ navigation }) => {
     console.log('Selected group:', groupId);
     setSelectedGroupId(groupId);
     setGroupSelectVisible(true);
+    closeModal();
   };
 
   const handleAddExpense = (method) => {
     setGroupSelectVisible(false);
     if (method === 'manual') {
-      navigation.navigate('ManualExpense', { groupId: selectedGroupId });
+      navigation.navigate('AddExpense', { groupId: selectedGroupId });
     } else if (method === 'scan') {
       navigation.navigate('Googlevision', { groupId: selectedGroupId });
     }
@@ -67,10 +82,23 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.greeting}>Welcome, User!</Text>
 
           <Card containerStyle={styles.balanceCard}>
-            <Card.Title style={styles.title}>Overall Balance</Card.Title>
+            <Card.Title style={styles.title}>Member Balances</Card.Title>
             <Card.Divider />
-            <Text style={styles.paragraph}>Owe: ${totalOwe.toFixed(2)}</Text>
-            <Text style={styles.paragraph}>Owed: ${totalOwed.toFixed(2)}</Text>
+            {memberBalances.length > 0 ? (
+  memberBalances.map((balance) => {
+    const group = groups.find(g => g.expenses.some(e => Object.keys(e.allocations).includes(balance.memberId)));
+    const memberName = group ? getMemberNameById(balance.memberId, group) : 'Unknown Group';
+    return (
+      <View key={balance.memberId} style={styles.balanceItem}>
+        <Text style={styles.paragraph}>Member: {memberName}</Text>
+        <Text style={styles.paragraph}>Owe: ${balance.owe.toFixed(2)}</Text>
+        <Text style={styles.paragraph}>Owed: ${balance.owed.toFixed(2)}</Text>
+      </View>
+    );
+  })
+) : (
+  <Text style={styles.noGroupsText}>No member balances available.</Text>
+)}
           </Card>
 
           <TouchableOpacity style={styles.addButton} onPress={openModal}>
@@ -160,6 +188,12 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     backgroundColor: colors.cardBackground,
     borderRadius: sizes.card.borderRadius,
+  },
+  balanceItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginVertical: 5,
   },
   title: {
     fontSize: sizes.font.large,

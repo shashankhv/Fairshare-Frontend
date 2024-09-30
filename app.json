@@ -37,7 +37,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hvshashank.fairshare"
     },
     "android": {
       "adaptiveIcon": {

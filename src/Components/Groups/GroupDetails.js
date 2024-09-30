@@ -56,6 +56,11 @@ const GroupDetails = ({ route }) => {
     }
   };
 
+  const getMemberNameById = (memberId) => {
+    const member = group.members.find(m => m.id === memberId);
+    return member ? member.name : 'Unknown Member';
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{group.name}</Text>
@@ -69,9 +74,8 @@ const GroupDetails = ({ route }) => {
             <Text>Date: {item.date}</Text>
             <Text>Total: {item.total}</Text>
             {Object.entries(item.allocations).map(([memberId, allocation]) => (
-              <Text key={memberId}>Member {memberId} owes: {allocation}</Text>
+              <Text key={memberId}>{getMemberNameById(memberId)} owes: {allocation}</Text>
             ))}
-            {/* Display more expense details if needed */}
           </View>
         )}
         ListEmptyComponent={<Text>No expenses recorded.</Text>}
@@ -128,7 +132,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     flex: 1,
-    alignItems: 'center',
+    // alignItems: 'center',
     backgroundColor: colors.background,
   },
   title: {
@@ -139,10 +143,13 @@ const styles = StyleSheet.create({
   },
   expenseItem: {
     padding: 10,
+    fontSize: sizes.font.medium,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     marginVertical: 5,
-    width: '100%',
+    width: '100%', // Make the expense item take full width
+    backgroundColor: colors.cardBackground, // Optional: to make it stand out
+    borderRadius: 8, // Optional: for rounded corners
   },
   expenseButton: {
     marginTop: 20,
@@ -217,5 +224,4 @@ const styles = StyleSheet.create({
     fontSize: sizes.font.medium,
   },
 });
-
 export default GroupDetails;
