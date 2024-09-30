@@ -3,22 +3,22 @@
     "production": {
       "android": {
         "buildType": "apk",
-        "image": "ubuntu-20.04-android-30"
+        "image": "ubuntu-latest"
       },
       "ios": {
-        "image": "macos-12-xcode-14"
+        "image": "macos-latest"
       }
     },
     "preview": {
       "android": {
         "buildType": "apk",
-        "image": "ubuntu-20.04-android-30"
+        "image": "ubuntu-latest"
       }
     },
     "development": {
       "android": {
         "buildType": "apk",
-        "image": "ubuntu-20.04-android-30"
+        "image": "ubuntu-latest"
       }
     }
   }
