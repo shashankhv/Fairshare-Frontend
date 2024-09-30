@@ -1,18 +1,25 @@
 {
-  "cli": {
-    "version": ">= 10.2.2"
-  },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
+    "production": {
+      "android": {
+        "buildType": "apk",
+        "image": "ubuntu-20.04-android-30"
+      },
+      "ios": {
+        "image": "macos-12-xcode-14"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "android": {
+        "buildType": "apk",
+        "image": "ubuntu-20.04-android-30"
+      }
     },
-    "production": {}
-  },
-  "submit": {
-    "production": {}
+    "development": {
+      "android": {
+        "buildType": "apk",
+        "image": "ubuntu-20.04-android-30"
+      }
+    }
   }
 }
