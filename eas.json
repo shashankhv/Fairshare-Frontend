@@ -3,22 +3,22 @@
     "production": {
       "android": {
         "buildType": "apk",
-        "image": "ubuntu-latest"
+        "image": "ubuntu-22.04-jdk-17-ndk-r26b"  // Choose the correct image based on your project requirements
       },
       "ios": {
-        "image": "macos-latest"
+        "image": "macos-12-xcode-14"
       }
     },
     "preview": {
       "android": {
         "buildType": "apk",
-        "image": "ubuntu-latest"
+        "image": "ubuntu-22.04-jdk-17-ndk-r26b"  // Update with one of the valid options
       }
     },
     "development": {
       "android": {
         "buildType": "apk",
-        "image": "ubuntu-latest"
+        "image": "ubuntu-22.04-jdk-17-ndk-r26b"  // Update with one of the valid options
       }
     }
   }
