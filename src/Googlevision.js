@@ -97,7 +97,7 @@ const ReceiptDataFetcher = ({ navigation, route }) => {
 
       try {
         console.log('Uploading image...');
-        const response = await axios.post('http://206.81.15.12:3001/scan-receipt', formData, {
+        const response = await axios.post('http://143.198.177.106:3000/scan-receipt', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
